@@ -13,6 +13,8 @@ RUN rm src/*.rs
 # Copy source files
 COPY ./src ./src
 
+RUN ls
+
 # Build source files 
 RUN rm ./target/release/deps/villiamr-karpov-project
 RUN cargo build --release

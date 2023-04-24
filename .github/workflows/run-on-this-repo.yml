@@ -10,10 +10,10 @@ on:
       - completed
       
 jobs: 
-  	run:
+    run:
       runs-on: "ubuntu-latest"
       steps:
         - uses: "actions/checkout@v3"
-        - name: "TODO to Issue"
-          uses: "IndaPlus22/villiamr-karpov-project@feature"
+        - name: "Run on this repo"
+        uses: "IndaPlus22/villiamr-karpov-project@feature"
   

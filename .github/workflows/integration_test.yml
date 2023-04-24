@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [main]
   workflow_run:
-    workflows: ["Docker Publish"]
+    workflows: ["Docker"]
     branches: [main]
     types:
       - completed

@@ -1,0 +1,19 @@
+name: Run Action
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_run:
+    workflows: ["Docker"]
+    branches: [main]
+    types:
+      - completed
+      
+jobs: 
+  	run:
+      runs-on: "ubuntu-latest"
+      steps:
+        - uses: "actions/checkout@v3"
+        - name: "TODO to Issue"
+          uses: "IndaPlus22/villiamr-karpov-project@feature"
+  

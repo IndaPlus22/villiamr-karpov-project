@@ -1,7 +1,7 @@
 FROM rust:1.68 AS build
 
-RUN cargo new --bin todo-actions
-WORKDIR /todo-actions
+RUN cargo new --bin villiamr-karpov-project
+WORKDIR /villiamr-karpov-project
 
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
@@ -14,11 +14,11 @@ RUN rm src/*.rs
 COPY ./src ./src
 
 # Build source files 
-RUN rm ./target/release/deps/todo-actions
+RUN rm ./target/release/deps/villiamr-karpov-project
 RUN cargo build --release
 
 FROM ubuntu:latest AS runtime
 
-COPY --from=build /todo-actions/target/release/todo-actions .
+COPY --from=build /villiamr-karpov-project/target/release/villiamr-karpov-project .
 
-ENTRYPOINT ["/todo-actions"]
+ENTRYPOINT ["/villiamr-karpov-project"]

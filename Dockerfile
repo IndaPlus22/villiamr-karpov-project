@@ -17,7 +17,7 @@ COPY ./src ./src
 RUN rm ./target/release/deps/todo-actions
 RUN cargo build --release
 
-FROM ubuntu-latest
+FROM ubuntu-latest AS runtime
 
 COPY --from=build /todo-actions/target/release/todo-actions .
 

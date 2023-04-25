@@ -1,0 +1,19 @@
+name: Integration test
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_run:
+    workflows: ['Docker']
+    branches: [main]
+    types:
+      - completed
+    
+jobs:
+  run-container: # Simply runs the program 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./
+
+# More tests to be added ...

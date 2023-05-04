@@ -9,7 +9,7 @@ fn main() {
            Err(e)  => println!("Variable {} not set: {}", v ,e)
         }
     }
-    let token = match env::var("GITHUB_TOKEN") {
+    let token = match env::var("INPUT_TOKEN") {
         Ok(val) => val,
         Err(e) => {
             eprintln!("Error: {}", e);

@@ -1,0 +1,33 @@
+name: 'Todo Issues'
+author: 'Villiam Riegler, ...'
+inputs:
+  # Context variables about the workflow https://docs.github.com/en/actions/learn-github-actions/contexts
+  # Inputs are set as environment variables 
+  REPO:
+    desecription: 'Path to github repository'
+    required: false
+    default: '${{github.repository}}'
+  LATEST_PUSH:
+    desecription: 'SHA of latest pushed commit, if none than '
+    required: false
+    default: '${{github.event.before || github.base_ref}}'
+  COMMITS: 
+    desecription: 'Array of previous commits'
+    required: false
+    default: '${{toJSON(github.event.commits)}}'
+  TOKEN: 
+    desecription: 'Authentication token to allow issue creation'
+    required: false
+    default: '${{github.token}}'
+  DIFF_URL:
+    desecription: 'Url to get pull request diff'
+    required: false
+    default: '${{github.event.pull_request.get_diff}}'
+  API_URL:
+    desecription: 'Base url of github api'
+    required: false
+    default: '${{github.api_url}}'
+  
+runs: 
+  using: 'docker'
+  image: 'Dockerfile'

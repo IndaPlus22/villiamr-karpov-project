@@ -1,7 +1,7 @@
 use std::env;
-//use reqwest;
+use reqwest;
 fn main() {
-    let vars = vec!["INPUT_REPO", "INPUT_LATEST_PUSH", "INPUT_COMMITS", "INPUT_DIFF_URL", "INPUT_API_URL, INPUT_TOKEN"];
+    let vars = vec!["INPUT_REPO", "INPUT_LATEST_PUSH", "INPUT_COMMITS", "INPUT_DIFF_URL", "INPUT_API_URL"];
 
     for v in vars {
         match env::var(v) {
@@ -9,6 +9,13 @@ fn main() {
            Err(e)  => println!("Variable {} not set: {}", v ,e)
         }
     }
+    let token = match env::var("GITHUB_TOKEN") {
+        Ok(val) => val,
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    };
 }
 //Might be able to make asynchonous
 // fn create_issue() {

@@ -16,7 +16,7 @@ fn main() {
             std::process::exit(1);
         }
     };
-    create_issue(&token);
+    //create_issue(&token);
 }
 //Might be able to make asynchonous
 fn create_issue(token: &str) {

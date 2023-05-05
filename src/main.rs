@@ -1,6 +1,8 @@
 use std::env;
 use reqwest;
-fn main() {
+
+#[tokio::main]
+async fn main() {
     let vars = vec!["INPUT_REPO", "INPUT_LATEST_PUSH", "INPUT_COMMITS", "INPUT_DIFF_URL", "INPUT_API_URL"];
 
     for v in vars {
@@ -16,8 +18,10 @@ fn main() {
             std::process::exit(1);
         }
     };
-    create_issue(&token);
+    create_issue(&token).await?;
+    Ok(())
 }
+
 //Might be able to make asynchonous
 async fn create_issue(token: &str) -> Result<(), reqwest::Error> {
     let body = r#"{"title":"Found a bug","body":"I'm having a problem with this."}"#;
@@ -30,12 +34,8 @@ async fn create_issue(token: &str) -> Result<(), reqwest::Error> {
     .body(body)
     .send()
     .await?;
-    if !res.status().is_success() {
-        let body = res.text().await?;
-        println!("Failed to create issue: {}", body);
-        return Err(reqwest::Error::new(reqwest::StatusCode::BAD_REQUEST, body));
-    }
-
-    println!("Issue created successfully!");
+    //println!("Response status: {}", res.status());
+    let body1 = res.text().await?;
+    println!("Response body: {}", body);
     Ok(())
 }

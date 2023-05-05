@@ -30,8 +30,12 @@ async fn create_issue(token: &str) -> Result<(), reqwest::Error> {
     .body(body)
     .send()
     .await?;
-    //println!("Response status: {}", res.status());
-    let body1 = res.text().await?;
-    println!("Response body: {}", body1);
+    if !res.status().is_success() {
+        let body = res.text().await?;
+        println!("Failed to create issue: {}", body);
+        return Err(reqwest::Error::new(reqwest::StatusCode::BAD_REQUEST, body));
+    }
+
+    println!("Issue created successfully!");
     Ok(())
 }

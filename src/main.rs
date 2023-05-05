@@ -27,6 +27,6 @@ fn create_issue(token: &str) {
     .header("AUTHORIZATION", "token ${{ secrets.GITHUB_TOKEN }}")
     .header("X-GITHUB-API-VERSION", "2022-11-28")
     .body(body)
-    .send();
-    println!("Response status: {}", res.status());
+    .send().await?;
+    println!("Response status: {}", res.await?.status());
 }

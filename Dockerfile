@@ -9,9 +9,7 @@ COPY ./src ./src
 
 RUN cargo build --release
 
-FROM ubuntu:latest AS runtime
-# make sure libssl.so.1.1 is available
-RUN apt-get update && apt-get install -y libssl-dev && apt clean && rm -rf /var/lib/apt/lists/*
+FROM ubuntu:20.04 AS runtime
 
 COPY --from=build /villiamr-karpov-project/target/release/villiamr-karpov-project .
 

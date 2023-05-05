@@ -11,7 +11,7 @@ RUN cargo build --release
 
 FROM ubuntu:latest AS runtime
 # make sure libssl.so.1.1 is available
-RUN apt-get update && apt-get install -y libssl1.1 && apt clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y libssl-dev && apt clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build /villiamr-karpov-project/target/release/villiamr-karpov-project .
 

@@ -23,7 +23,7 @@ async fn main() {
 }
 
 //Might be able to make asynchonous
-async fn create_issue(token: &str) -> Result<(), reqwest::Error> {
+async fn create_issue(token: &str) -> Result<> {
     let body = r#"{"title":"Found a bug","body":"I'm having a problem with this."}"#;
     let client = reqwest::Client::new();
     let res = client

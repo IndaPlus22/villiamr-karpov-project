@@ -11,7 +11,7 @@ RUN cargo build --release
 
 FROM ubuntu:20.04 AS runtime
 
-RUN apt update && apt-get install openssl
+RUN apt-get update && apt install -y openssl
 
 COPY --from=build /villiamr-karpov-project/target/release/villiamr-karpov-project .
 

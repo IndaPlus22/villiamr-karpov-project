@@ -17,6 +17,7 @@ impl ApiInteraction {
 
     async fn post_issue(self, title: String, body: String) -> Result<(), Error>{
         let mut headers = HeaderMap::new();
+        headers.insert(header::USER_AGENT, header::HeaderValue::from_static("TODO ACTION"))
         headers.insert(header::AUTHORIZATION, self.token.parse().unwrap());
         headers.insert(header::CONTENT_TYPE, header::HeaderValue::from_static("application/json"));
 

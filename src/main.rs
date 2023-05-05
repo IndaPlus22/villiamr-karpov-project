@@ -25,6 +25,8 @@ impl ApiInteraction {
             "title": title,
             "body": body,
         });
+        
+        println!("{:?}",headers);
 
         let client = reqwest::Client::new();
 

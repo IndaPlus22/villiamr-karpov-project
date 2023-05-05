@@ -1,7 +1,7 @@
 use std::env;
 use reqwest;
 
-async fn main() {
+fn main() {
     let vars = vec!["INPUT_REPO", "INPUT_LATEST_PUSH", "INPUT_COMMITS", "INPUT_DIFF_URL", "INPUT_API_URL"];
 
     for v in vars {
@@ -17,7 +17,11 @@ async fn main() {
             std::process::exit(1);
         }
     };
-    create_issue(&token).await?;
+    match create_issue(&token).await {
+        Ok(()) => println!("Issue created successfully"),
+        Err(e) => eprintln!("Error creating issue: {}", e),
+    }
+
     Ok(())
 }
 

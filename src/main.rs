@@ -30,6 +30,8 @@ async fn create_issue(token: &str) -> Result<(), reqwest::Error> {
     .body(body)
     .send()
     .await?;
-    println!("Response status: {}", res.status());
+    //println!("Response status: {}", res.status());
+    let body1 = res.text().await?;
+    println!("Response body: {}", body1);
     Ok(())
 }

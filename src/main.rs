@@ -19,7 +19,7 @@ fn main() {
     create_issue(&token);
 }
 //Might be able to make asynchonous
-fn create_issue(token: &str) {
+async fn create_issue(token: &str) {
     let body = r#"{"title":"Found a bug","body":"I'm having a problem with this."}"#;
     let client = reqwest::Client::new();
     let res = client.post("https://github.com/IndaPlus22/villiamr-karpov-project/issues")
@@ -28,5 +28,5 @@ fn create_issue(token: &str) {
     .header("X-GITHUB-API-VERSION", "2022-11-28")
     .body(body)
     .send().await?;
-    println!("Response status: {}", res.await?.status());
+    println!("Response status: {}", res.status());
 }

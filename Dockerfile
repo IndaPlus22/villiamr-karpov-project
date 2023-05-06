@@ -1,18 +1,19 @@
-FROM rust:1.68 AS build
+FROM lukemathwalker/cargo-chef:latest-rust-1.59.0 AS chef
+WORKDIR app
 
-RUN cargo new --bin villiamr-karpov-project
-WORKDIR /villiamr-karpov-project
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recepie-path recepie.json
 
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
-COPY ./src ./src
-
-RUN cargo build --release
+FROM chef AS builder
+COPY --from=planner /app/recepie.json recepie.json
+# Build and cache deps before source
+RUN cargo chef cook --release --recepie-path recepie.json
+# Build source
+RUN cargo build --release --bin binary
 
 FROM ubuntu:20.04 AS runtime
+RUN apt-get update && apt install -y openssl ca-certificates
+COPY --from=builder /app/target/release/binary .
 
-RUN apt-get update && apt install -y openssl && apt-get install ca-certificates
-
-COPY --from=build /villiamr-karpov-project/target/release/villiamr-karpov-project .
-
-ENTRYPOINT ["/villiamr-karpov-project"]
+ENTRYPOINT ["/binary"]

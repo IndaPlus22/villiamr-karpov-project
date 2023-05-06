@@ -1,16 +1,20 @@
-FROM rust:1.68 AS build
+FROM lukemathwalker/cargo-chef:latest-rust-latest AS chef
+WORKDIR app
 
-RUN cargo new --bin villiamr-karpov-project
-WORKDIR /villiamr-karpov-project
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
 
-COPY ./Cargo.lock ./Cargo.lock
-COPY ./Cargo.toml ./Cargo.toml
-COPY ./src ./src
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+# Build and cache deps before source
+RUN cargo chef cook --release --recipe-path recipe.json
+# Build source
+COPY . .
+RUN cargo build --release --bin villiamr-karpov-project
 
-RUN cargo build --release
-
-FROM ubuntu:latest AS runtime
-
-COPY --from=build /villiamr-karpov-project/target/release/villiamr-karpov-project .
+FROM ubuntu:20.04 AS runtime
+RUN apt-get update && apt install -y openssl ca-certificates
+COPY --from=builder /app/target/release/villiamr-karpov-project .
 
 ENTRYPOINT ["/villiamr-karpov-project"]

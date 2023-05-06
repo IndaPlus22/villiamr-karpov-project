@@ -17,4 +17,4 @@ FROM ubuntu:20.04 AS runtime
 RUN apt-get update && apt install -y openssl ca-certificates
 COPY --from=builder /app/target/release/villiamr-karpov-project .
 
-ENTRYPOINT ["./villiamr-karpov-project"]
+ENTRYPOINT ["/villiamr-karpov-project"]

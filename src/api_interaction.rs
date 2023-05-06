@@ -1,0 +1,44 @@
+use reqwest::{header::{self,HeaderMap}, Error};
+use serde_json::json;
+
+pub struct GithubApiClient {
+    url: String,
+    headers: HeaderMap
+}
+
+impl GithubApiClient {
+    pub fn new() -> GithubApiClient {
+        let mut header = HeaderMap::new();
+        header.insert(header::USER_AGENT, header::HeaderValue::from_static("TODO ACTION"));
+        header.insert(header::AUTHORIZATION,format!("token {}",std::env::var("INPUT_TOKEN").unwrap()).parse().unwrap());
+        header.insert(header::CONTENT_TYPE, header::HeaderValue::from_static("application/json"));
+
+
+        return GithubApiClient{
+            headers: header, 
+            url:format!("{}/repos/{}/issues", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap())
+        };
+    }
+
+    pub async fn post_issue(self, title: String, body: String) -> Result<(), Error>{
+        let playload = json!({
+            "title": title,
+            "body": body,
+        });
+        
+        let client = reqwest::Client::new();
+
+        let resp = client.post(self.url)
+            .headers(self.headers)
+            .json(&playload)
+            .send()
+            .await?;
+
+        println!("Status: {}", resp.status());
+
+        let resp_body = resp.text().await?;
+        println!("Response body: {}", resp_body);
+
+        Ok(())
+    }
+}

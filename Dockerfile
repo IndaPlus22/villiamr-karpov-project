@@ -3,12 +3,12 @@ WORKDIR app
 
 FROM chef AS planner
 COPY . .
-RUN cargo chef prepare --recepie-path recepie.json
+RUN cargo chef prepare --recipe-path recipe.json
 
 FROM chef AS builder
-COPY --from=planner /app/recepie.json recepie.json
+COPY --from=planner /app/recipe.json recipe.json
 # Build and cache deps before source
-RUN cargo chef cook --release --recepie-path recepie.json
+RUN cargo chef cook --release --recipe-path recipe.json
 # Build source
 RUN cargo build --release --bin binary
 

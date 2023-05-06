@@ -1,4 +1,4 @@
-use reqwest::{header::{self,HeaderMap}, Error};
+use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
 use serde_json::json;
 
 pub struct GithubApiClient {
@@ -20,7 +20,7 @@ impl GithubApiClient {
         };
     }
 
-    pub async fn post_issue(self, title: String, body: String) -> Result<(), Error>{
+    pub async fn post_issue(self, title: String, body: String) -> Result<StatusCode, Error>{
         let playload = json!({
             "title": title,
             "body": body,
@@ -34,11 +34,10 @@ impl GithubApiClient {
             .send()
             .await?;
 
-        println!("Status: {}", resp.status());
-
+        let status = resp.status();
         let resp_body = resp.text().await?;
         println!("Response body: {}", resp_body);
 
-        Ok(())
+        Ok(status)
     }
 }

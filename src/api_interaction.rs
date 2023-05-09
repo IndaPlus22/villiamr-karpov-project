@@ -52,7 +52,7 @@ impl GithubApiClient {
         let resp = client.get(url)
             .headers(self.headers.clone())
             .send()
-            .await;
+            .await?;
         
         let status = resp.status();
         let resp_body = resp.text().await?;

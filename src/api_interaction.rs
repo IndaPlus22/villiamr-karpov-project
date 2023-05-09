@@ -89,7 +89,7 @@ impl GithubApiClient {
             }
 
             let content = file_json.get("content").unwrap().as_str().unwrap();
-
+            println!("Content: {}", content);
             //convert from base64
             let decoded = base64::decode(content).unwrap();
             let decoded_str = String::from_utf8(decoded).unwrap();

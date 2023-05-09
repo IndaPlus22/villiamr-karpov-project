@@ -83,6 +83,11 @@ impl GithubApiClient {
 
             let file_json : serde_json::Value = serde_json::from_str(&file_resp).unwrap();
 
+            //check if content exists
+            if !file_json.get("content").is_some() {
+                continue;
+            }
+
             let content = file_json.get("content").unwrap().as_str().unwrap();
 
             //convert from base64

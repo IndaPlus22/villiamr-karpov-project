@@ -42,7 +42,7 @@ impl GithubApiClient {
     }
 
     // Git trees api??
-    pub async fn get_files(self, path: Option<String>) -> Result<StatusCode, Error> {
+    pub async fn get_files(&self, path: Option<String>) -> Result<StatusCode, Error> {
         let client = reqwest::Client::new();
 
         //default should be an empty string
@@ -66,7 +66,7 @@ impl GithubApiClient {
                 println!("Path: {}", path);
                 self.get_files(Some(path.to_string())).await?;
             }
-            
+
             let url = item.get("url").unwrap().as_str().unwrap();
             println!("Url: {}", url)
         }

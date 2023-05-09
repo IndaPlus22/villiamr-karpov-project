@@ -64,7 +64,7 @@ impl GithubApiClient {
         let tree = &json["tree"];
         
         for item in tree.as_array().unwrap() {
-            //if item type is dir we need to run this function on that directory
+            //Checks if the item is a file
             if item.get("type").unwrap().as_str().unwrap() != "blob" {
                 continue;
             }
@@ -73,7 +73,7 @@ impl GithubApiClient {
             println!("Name: {}", name);
             println!("Url: {}", url);
 
-            //get the content and then print it
+            //get the content of the file
             let filereq = client.get(url)
                 .headers(self.headers.clone())
                 .send()
@@ -88,25 +88,14 @@ impl GithubApiClient {
                 continue;
             }
 
-
-            let content = file_json.get("content").unwrap().as_str().unwrap();
             
-            //Get the lines of the file
-            let lines: Vec<&str> = content.split('\n').collect();
-
-
-            let mut decoded_lines = Vec::new();
-            //Decode each line
-            for line in lines {
-                let decoded_line = base64::decode(line).unwrap();
-                decoded_lines.push(decoded_line);
-            }
-
-            //print the lines
-            for line in decoded_lines {
-                println!("{}", String::from_utf8(line).unwrap());
-            }
-
+            let content = file_json.get("content").unwrap().as_str().unwrap();
+            //decode from base64
+            let decoded = base64::Engine::decode(content).unwrap();
+            let decoded_str = String::from_utf8(decoded).unwrap();
+            
+            //print the content
+            println!("Content: {}", decoded_str);
 
         }
         

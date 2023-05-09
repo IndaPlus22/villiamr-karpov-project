@@ -55,10 +55,19 @@ impl GithubApiClient {
         let status = resp.status();
         let resp_body = resp.text().await?;
 
+        //Get the url for each file/directory
+        let json: serde_json::Value = serde_json::from_str(&resp_body).unwrap();
+        
+        for item in json.as_array().unwrap() {
+            let url = item.get("url").as_str().unwrap();
+            println!("Url: {}", url)
+        }
+        
+
         //Check for errors here
 
         //print response body
-        println!("Response body: {}", resp_body);
+        //println!("Response body: {}", resp_body);
 
         //Return status
         Ok(status)

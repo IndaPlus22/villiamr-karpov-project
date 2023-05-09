@@ -19,7 +19,7 @@ impl GithubApiClient {
     }
 
     pub async fn post_issue(self, title: String, body: String) -> Result<StatusCode, Error>{
-        let playload = json!({
+        let payload = json!({
             "title": title,
             "body": body,
         });
@@ -28,7 +28,7 @@ impl GithubApiClient {
 
         let url = format!("{}/repos/{}/issues", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
 
-        let resp = client.post(self.url)
+        let resp = client.post(url)
             .headers(self.headers)
             .json(&playload)
             .send()
@@ -40,8 +40,27 @@ impl GithubApiClient {
 
         Ok(status)
     }
+    
+    // Git trees api??
+    pub async fn get_files(self) -> Result<StatusCode, Error> {
+        let client = reqwest::Client::new();
 
-    pub async fn get_files(self) -> Result<String, Error> {
+        let url = format!("{}/repos/{}/contents/", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
 
+        let resp = client.get(url)
+            .headers(self.headers)
+            .send()
+            .await?;
+        
+        let status = resp.status();
+        let resp_body = resp.text().await?;
+
+        //Check for errors here
+
+        //print response body
+        println!("Response body: {}", resp_body);
+
+        //Return status
+        Ok(status)
     }
 }

@@ -30,7 +30,7 @@ impl GithubApiClient {
 
         let resp = client.post(url)
             .headers(self.headers)
-            .json(&playload)
+            .json(&payload)
             .send()
             .await?;
 
@@ -40,7 +40,7 @@ impl GithubApiClient {
 
         Ok(status)
     }
-    
+
     // Git trees api??
     pub async fn get_files(self) -> Result<StatusCode, Error> {
         let client = reqwest::Client::new();

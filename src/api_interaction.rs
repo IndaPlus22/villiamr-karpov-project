@@ -42,10 +42,11 @@ impl GithubApiClient {
     }
 
     // Git trees api??
-    pub async fn get_files(self) -> Result<StatusCode, Error> {
+    pub async fn get_files(self, path: Option<String>) -> Result<StatusCode, Error> {
         let client = reqwest::Client::new();
 
-        let url = format!("{}/repos/{}/contents/", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
+        //default should be an empty string
+        let url = format!("{}/repos/{}/contents/{}", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap(), path.unwrap_or("".to_string()));
 
         let resp = client.get(url)
             .headers(self.headers)
@@ -55,10 +56,17 @@ impl GithubApiClient {
         let status = resp.status();
         let resp_body = resp.text().await?;
 
-        //Get the url for each file/directory
+        //Get the url for each file
         let json: serde_json::Value = serde_json::from_str(&resp_body).unwrap();
         
         for item in json.as_array().unwrap() {
+            //if item type is dir we need to run this function on that directory
+            if item.get("type").unwrap().as_str().unwrap() == "dir" {
+                let path = item.get("path").unwrap().as_str().unwrap();
+                println!("Path: {}", path);
+                self.get_files(Some(path.to_string())).await?;
+            }
+            
             let url = item.get("url").unwrap().as_str().unwrap();
             println!("Url: {}", url)
         }

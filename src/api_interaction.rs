@@ -88,23 +88,28 @@ impl GithubApiClient {
                 continue;
             }
 
-            let content = file_json.get("content").unwrap().as_str().unwrap();
-            println!("Content: {}", content);
-            //convert from base64
-            let decoded = base64::decode(content).unwrap();
-            let decoded_str = String::from_utf8(decoded).unwrap();
 
-            //print content
-            println!("Content: {}", decoded_str);
+            let content = file_json.get("content").unwrap().as_str().unwrap();
+            
+            //Get the lines of the file
+            let lines: Vec<&str> = content.split('\n').collect();
+
+
+            let mut decoded_lines = Vec::new();
+            //Decode each line
+            for line in lines {
+                let decoded_line = base64::decode(line).unwrap();
+                decoded_lines.push(decoded_line);
+            }
+
+            //print the lines
+            for line in decoded_lines {
+                println!("{}", String::from_utf8(line).unwrap());
+            }
+
 
         }
         
-
-        //Check for errors here
-
-        //print response body
-        println!("Response body: {}", resp_body);
-
         //Return status
         Ok(status)
     }

@@ -90,12 +90,33 @@ impl GithubApiClient {
 
             
             let content = file_json.get("content").unwrap().as_str().unwrap();
-            //decode from base64
-            let decoded = base64::Engine::decode(content).unwrap();
-            let decoded_str = String::from_utf8(decoded).unwrap();
-            
-            //print the content
-            println!("Content: {}", decoded_str);
+            //The content is encoded in base64 but the newlines are not encoded. So we handle that by splitting the lines and decoding them one by one
+            //Get the lines of the file
+            let temp_lines: Vec<&str> = content.split('\n').collect();
+
+            let mut lines = Vec::new();
+            //JAG HAR INGEN ANING VARFÖR DET HÄR FUNKAR
+            //FÖR NÅGONG ANLEDNING FIXAR DET NEWLINE PROBLEMET OCH DECODAR RÄTT
+            for chunk in temp_lines.chunks(temp_lines.len()) {
+                let concatenated = chunk.join("");
+                lines.push(concatenated);
+        }
+
+            //Decode the lines
+            let mut decoded_lines = Vec::new();
+            //Decode each line
+            for line in lines {
+                //base64:decode might be deprecated
+                let decoded_line = base64::decode(line).unwrap();
+                //convert from utf8 to string and put it in the vector
+                decoded_lines.push(String::from_utf8(decoded_line).unwrap());
+            }
+
+            //print the lines
+            for line in decoded_lines {
+                println!("{}", String::from_utf8(line).unwrap());
+            }
+
 
         }
         

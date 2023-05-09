@@ -1,6 +1,6 @@
 use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
 use serde_json::json;
-use base64;
+use base64::{Engine as _, engine::{general_purpose}};
 
 pub struct GithubApiClient {
     headers: HeaderMap
@@ -107,14 +107,14 @@ impl GithubApiClient {
             //Decode each line
             for line in lines {
                 //base64:decode might be deprecated
-                let decoded_line = base64::decode(line).unwrap();
+                let decoded_line = general_purpose::STANDARD.decode(line).unwrap();
                 //convert from utf8 to string and put it in the vector
                 decoded_lines.push(String::from_utf8(decoded_line).unwrap());
             }
 
             //print the lines
             for line in decoded_lines {
-                println!("{}", String::from_utf8(line).unwrap());
+                println!("{}", line);
             }
 
 

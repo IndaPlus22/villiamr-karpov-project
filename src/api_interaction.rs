@@ -49,7 +49,7 @@ impl GithubApiClient {
         let url = format!("{}/repos/{}/contents/{}", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap(), path.unwrap_or("".to_string()));
 
         let resp = client.get(url)
-            .headers(self.headers)
+            .headers(&self.headers)
             .send()
             .await?;
         

@@ -42,24 +42,27 @@ impl GithubApiClient {
     }
 
     // Git trees api??
-    pub async fn get_files(&self, path: Option<String>) -> Result<StatusCode, Error> {
+    pub async fn get_files(self, path: Option<String>) -> Result<StatusCode, Error> {
         let client = reqwest::Client::new();
 
         //default should be an empty string
-        let url = format!("{}/repos/{}/contents/{}", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap(), path.unwrap_or("".to_string()));
+        //TODO: What if the main branch has some other name?
+        let url = format!("{}/repos/{}/git/trees/main?recursive=1", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
 
         let resp = client.get(url)
             .headers(self.headers.clone())
             .send()
-            .await?;
+            .await;
         
         let status = resp.status();
         let resp_body = resp.text().await?;
 
         //Get the url for each file
         let json: serde_json::Value = serde_json::from_str(&resp_body).unwrap();
+
+        let tree = &json["tree"];
         
-        for item in json.as_array().unwrap() {
+        for item in tree.as_array().unwrap() {
             //if item type is dir we need to run this function on that directory
             if item.get("type").unwrap().as_str().unwrap() == "dir" {
                 let path = item.get("path").unwrap().as_str().unwrap();

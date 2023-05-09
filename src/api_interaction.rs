@@ -59,7 +59,7 @@ impl GithubApiClient {
         let json: serde_json::Value = serde_json::from_str(&resp_body).unwrap();
         
         for item in json.as_array().unwrap() {
-            let url = item.get("url").as_str().unwrap();
+            let url = item.get("url").unwrap().as_str().unwrap();
             println!("Url: {}", url)
         }
         

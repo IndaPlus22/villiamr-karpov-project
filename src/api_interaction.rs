@@ -72,7 +72,7 @@ impl GithubApiClient {
         //Check for errors here
 
         //print response body
-        //println!("Response body: {}", resp_body);
+        println!("Response body: {}", resp_body);
 
         //Return status
         Ok(status)

@@ -1,5 +1,6 @@
 use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
 use serde_json::json;
+use base64;
 
 pub struct GithubApiClient {
     headers: HeaderMap

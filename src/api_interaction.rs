@@ -2,7 +2,6 @@ use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
 use serde_json::json;
 
 pub struct GithubApiClient {
-    url: String,
     headers: HeaderMap
 }
 
@@ -16,7 +15,6 @@ impl GithubApiClient {
 
         return GithubApiClient{
             headers: header, 
-            url:format!("{}/repos/{}/issues", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap())
         };
     }
 
@@ -27,6 +25,8 @@ impl GithubApiClient {
         });
         
         let client = reqwest::Client::new();
+
+        let url = format!("{}/repos/{}/issues", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
 
         let resp = client.post(self.url)
             .headers(self.headers)
@@ -39,5 +39,9 @@ impl GithubApiClient {
         println!("Response body: {}", resp_body);
 
         Ok(status)
+    }
+
+    pub async fn get_files(self) -> Result<String, Error> {
+
     }
 }

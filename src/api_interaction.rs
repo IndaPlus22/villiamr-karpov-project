@@ -64,8 +64,14 @@ impl GithubApiClient {
         
         for item in tree.as_array().unwrap() {
             //if item type is dir we need to run this function on that directory
+            if item.get("type").unwrap().as_str().unwrap() != "blob" {
+                continue;
+            }
             let url = item.get("url").unwrap().as_str().unwrap();
-            println!("Url: {}", url)
+            let name = item.get("path").unwrap().as_str().unwrap();
+            println!("Name: {}", name);
+            println!("Url: {}", url);
+
         }
         
 

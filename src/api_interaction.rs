@@ -72,6 +72,25 @@ impl GithubApiClient {
             println!("Name: {}", name);
             println!("Url: {}", url);
 
+            //get the content and then print it
+            let filereq = client.get(url)
+                .headers(self.headers.clone())
+                .send()
+                .await?;
+            
+            let file_resp = filereq.text().await?;
+
+            let file_json : serde_json::Value = serde_json::from_str(&file_resp).unwrap();
+
+            let content = file_json.get("content").unwrap().as_str().unwrap();
+
+            //convert from base64
+            let decoded = base64::decode(content).unwrap();
+            let decoded_str = String::from_utf8(decoded).unwrap();
+
+            //print content
+            println!("Content: {}", decoded_str);
+
         }
         
 

@@ -59,17 +59,8 @@ impl GithubApiClient {
         //Get the url for each file
         let json: serde_json::Value = serde_json::from_str(&resp_body).unwrap();
         
-        for item in json.as_array().unwrap() {
-            //if item type is dir we need to run this function on that directory
-            if item.get("type").unwrap().as_str().unwrap() == "dir" {
-                let path = item.get("path").unwrap().as_str().unwrap();
-                println!("Path: {}", path);
-                self.get_files(Some(path.to_string())).await?;
-            }
-
-            let url = item.get("url").unwrap().as_str().unwrap();
-            println!("Url: {}", url)
-        }
+        //call helper function to recursively search through directories
+        self.search_files(json.as_array().unwrap()).await?;
         
 
         //Check for errors here
@@ -79,5 +70,31 @@ impl GithubApiClient {
 
         //Return status
         Ok(status)
+    }
+
+    // This is the async helper function for performing the recursive file search
+    async fn search_files(&self, items: &[serde_json::Value]) -> Result<(), Error> {
+        for item in items {
+            //if item type is dir we need to run this function on that directory
+            if item.get("type").unwrap().as_str().unwrap() == "dir" {
+                let path = item.get("path").unwrap().as_str().unwrap();
+                println!("Path: {}", path);
+                let client = reqwest::Client::new();
+                let url = item.get("url").unwrap().as_str().unwrap();
+                let resp = client
+                    .get(url)
+                    .headers(self.headers.clone())
+                    .send()
+                    .await?;
+                let resp_body = resp.text().await?;
+                let json: serde_json::Value = serde_json::from_str(&resp_body).unwrap();
+                self.search_files(json.as_array().unwrap()).await?;
+            }
+
+            let url = item.get("url").unwrap().as_str().unwrap();
+            println!("Url: {}", url);
+        }
+
+        Ok(())
     }
 }

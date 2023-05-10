@@ -19,8 +19,20 @@ async fn main() -> Result<(), Error>{
     let filemap = api.get_files().await?;
 
     for (k ,v) in &filemap{
-        let extension = get_fileextension(k);
-        println!("{}",extension.expect("None Value"));
+        let extension = match get_fileextension(k) {
+            Some(val) => val,
+            None => continue
+        };
+
+        for line in v {
+            let comment = match line.find("//") {
+                Some(val) => &line[val..],
+                None => continue
+            };
+            
+            println!("{}", comment); 
+
+        }
     }
 
     Ok(())

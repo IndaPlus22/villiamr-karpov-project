@@ -51,6 +51,7 @@ impl GithubApiClient {
 
         //default should be an empty string
         //TODO: What if the main branch has some other name?
+        //Recurisve equal to something else?
         let url = format!("{}/repos/{}/git/trees/main?recursive=1", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
 
         let resp = client.get(url)
@@ -122,10 +123,6 @@ impl GithubApiClient {
 
         }
         
-        //print the keys of the hasmhmap for testing
-        for key in files.keys() {
-            println!("{}", key);
-        }
         //Return the hashmap
         Ok(files)
     }

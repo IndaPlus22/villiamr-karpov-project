@@ -1,6 +1,7 @@
 use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
 use serde_json::json;
 use base64::{Engine as _, engine::{general_purpose}};
+use std::collections::HashMap;
 
 pub struct GithubApiClient {
     headers: HeaderMap
@@ -45,7 +46,7 @@ impl GithubApiClient {
     // Git trees api??
     // Returns a hashmap with the name of the file as key and the content as value
     // the value will be a vector with each element representing a line of the file
-    pub async fn get_files(self) -> Result<HashMap<String, Vec<String>>, Error> {
+    pub async fn get_files(self) -> Result<HashMap<String, Vec<&str>>, Error> {
         let client = reqwest::Client::new();
 
         //default should be an empty string

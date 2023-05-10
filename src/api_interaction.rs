@@ -43,7 +43,9 @@ impl GithubApiClient {
     }
 
     // Git trees api??
-    pub async fn get_files(self) -> Result<StatusCode, Error> {
+    // Returns a hashmap with the name of the file as key and the content as value
+    // the value will be a vector with each element representing a line of the file
+    pub async fn get_files(self) -> Result<HashMap<String, Vec<&str>>, Error> {
         let client = reqwest::Client::new();
 
         //default should be an empty string
@@ -63,6 +65,9 @@ impl GithubApiClient {
 
         let tree = &json["tree"];
         
+        //Create the hashmap
+        let mut files = std::collections::HashMap::new();
+
         for item in tree.as_array().unwrap() {
             //Checks if the item is a file
             if item.get("type").unwrap().as_str().unwrap() != "blob" {
@@ -70,8 +75,6 @@ impl GithubApiClient {
             }
             let url = item.get("url").unwrap().as_str().unwrap();
             let name = item.get("path").unwrap().as_str().unwrap();
-            println!("Name: {}", name);
-            println!("Url: {}", url);
 
             //get the content of the file
             let filereq = client.get(url)
@@ -84,6 +87,7 @@ impl GithubApiClient {
             let file_json : serde_json::Value = serde_json::from_str(&file_resp).unwrap();
 
             //check if content exists
+            //Might not be neeeded
             if !file_json.get("content").is_some() {
                 continue;
             }
@@ -112,15 +116,16 @@ impl GithubApiClient {
                 decoded_lines.push(String::from_utf8(decoded_line).unwrap());
             }
 
-            //print the lines
-            for line in decoded_lines {
-                println!("{}", line);
-            }
-
+            //put the files in the hashmap
+            files.insert(String::from(name), decoded_lines);
 
         }
         
-        //Return status
-        Ok(status)
+        //print the keys of the hasmhmap for testing
+        for key in files.keys() {
+            println!("{}", key);
+        }
+        //Return the hashmap
+        Ok(files)
     }
 }

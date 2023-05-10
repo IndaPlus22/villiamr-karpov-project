@@ -20,7 +20,7 @@ impl GithubApiClient {
         };
     }
 
-    pub async fn post_issue(self, title: String, body: String) -> Result<StatusCode, Error>{
+    pub async fn post_issue(self, title: &str, body: &str) -> Result<StatusCode, Error>{
         let payload = json!({
             "title": title,
             "body": body,

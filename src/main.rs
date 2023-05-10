@@ -32,12 +32,12 @@ async fn main() -> Result<(), Error>{
         }
 
         for line in v {
-            let comment = match line.find("//") {
-                Some(val) => &line[val..],
-                None => continue
-            };
+            //let comment = match line.find("//") {
+            //    Some(val) => &line[val..],
+            //    None => continue
+            //};
             
-            println!("!!!!{}!!!!", comment); 
+            println!("!!!!{}!!!!", line); 
 
         }
     }

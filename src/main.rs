@@ -24,6 +24,13 @@ async fn main() -> Result<(), Error>{
             None => continue
         };
 
+        // For #[test]
+        let mut j = 0;
+        match extension {
+            "rs" => assert_eq!(0,j),
+            _ => continue
+        }
+
         for line in v {
             let comment = match line.find("//") {
                 Some(val) => &line[val..],

@@ -31,7 +31,7 @@ impl GithubApiClient {
         let url = format!("{}/repos/{}/issues", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
 
         let resp = client.post(url)
-            .headers(self.headers)
+            .headers(self.headers.clone())
             .json(&payload)
             .send()
             .await?;

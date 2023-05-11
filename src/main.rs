@@ -31,14 +31,15 @@ async fn main() -> Result<(), Error>{
         for line in content.split('\n').into_iter() {
             if line.find("//").is_none() {
                 if title_buffer != "" {
-                    api.post_issue(title_buffer, &body_buffer);
+                    api.post_issue(title_buffer, &body_buffer).await?;
                     title_buffer = "";
                     body_buffer = "".to_owned();
                     is_title = true;
                 }
                 continue;
             }
-
+            
+            println!("LINE:    {}",line);
             if is_title {
                 title_buffer = &line[line.find("//").unwrap() + 2..];
                 is_title = false;

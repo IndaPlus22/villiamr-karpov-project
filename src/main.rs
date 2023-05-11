@@ -24,6 +24,10 @@ async fn main() -> Result<(), Error>{
             None => continue
         };
         
+        if extension != "rs" {
+            continue;
+        }
+        println!("RUST FILE FOUND");
         let content = &v[0];
         let mut is_title = true;
         let mut title_buffer: &str = "";

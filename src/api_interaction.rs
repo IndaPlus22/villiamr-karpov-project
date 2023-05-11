@@ -86,7 +86,10 @@ impl GithubApiClient {
             
             let file_resp = filereq.text().await?;
 
-            let file_json : serde_json::Value = serde_json::from_str(&file_resp).unwrap();
+            let file_json : serde_json::Value = match serde_json::from_str(&file_resp){
+                Ok(val) => val,
+                Err(e) => continue
+            };
 
             //check if content exists
             //Might not be neeeded

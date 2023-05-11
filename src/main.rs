@@ -23,16 +23,29 @@ async fn main() -> Result<(), Error>{
             Some(val) => val,
             None => continue
         };
+        
+        let content = &v[0];
+        let mut is_title = true;
+        let mut title_buffer: &str = "";
+        let mut body_buffer: String = "".to_owned();
+        for line in content.split('\n').into_iter() {
+            if line.find("//").is_none() {
+                if title_buffer != "" {
+                    api.post_issue(title_buffer, &body_buffer);
+                    title_buffer = "";
+                    body_buffer = "".to_owned();
+                    is_title = true;
+                }
+                continue;
+            }
 
-        println!("Total lines: {}", v.len());
-        for line in v {
-            //let comment = match line.find("//") {
-            //    Some(val) => &line[val..],
-            //    None => continue
-            //};
-            
-            println!("{}", line); 
-
+            if is_title {
+                title_buffer = &line[line.find("//").unwrap() + 2..];
+                is_title = false;
+            }
+            else {
+                body_buffer = body_buffer + &line[line.find("//").unwrap() + 2..];
+            }
         }
     }
 

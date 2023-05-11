@@ -20,7 +20,7 @@ impl GithubApiClient {
         };
     }
 
-    pub async fn post_issue(self, title: &str, body: &str) -> Result<StatusCode, Error>{
+    pub async fn post_issue(&self, title: &str, body: &str) -> Result<StatusCode, Error>{
         let payload = json!({
             "title": title,
             "body": body,
@@ -46,7 +46,7 @@ impl GithubApiClient {
     // Git trees api??
     // Returns a hashmap with the name of the file as key and the content as value
     // the value will be a vector with each element representing a line of the file
-    pub async fn get_files(self) -> Result<HashMap<String, Vec<String>>, Error> {
+    pub async fn get_files(&self) -> Result<HashMap<String, Vec<String>>, Error> {
         let client = reqwest::Client::new();
 
         //default should be an empty string

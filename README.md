@@ -1,4 +1,9 @@
-## The project
+## TODOS into Issues
 
-Our idea is to make a tool for github that searches through all comments of a GIT repo in search of "TODO" comments. All these TODO comments will then be turned into issues on the GITHUB repo. The plan is for this tool to either run on your local machine or try and make it work through a GITHUB workflow. The code will primarily be done in Rust. The purpose is to learn about the use of APIS and also learn more about the Rust programming language. We will also work on optimzing so that the tool works as fast as possible.
+This Github action will turn all your "TODO" comments into a issue on your Github repository. 
+
+#How to use
+It is simple! Just add this action to your Github repository. The action will each time you commit a new change look for TODOS and turn them into a issue.
+
+
 

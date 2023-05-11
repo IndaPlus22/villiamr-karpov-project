@@ -27,7 +27,7 @@ async fn main() -> Result<(), Error>{
         if extension != "rs" {
             continue;
         }
-        println!("RUST FILE FOUND");
+
         let content = &v[0];
         let mut is_title = true;
         let mut title_buffer: &str = "";
@@ -45,7 +45,7 @@ async fn main() -> Result<(), Error>{
             
             println!("LINE:    {}",line);
             if is_title {
-                title_buffer = &line[line.find("//").unwrap() + 2..];
+                title_buffer = &line[line.find("//TODO:").unwrap() + 7..];
                 is_title = false;
             }
             else {
@@ -53,6 +53,9 @@ async fn main() -> Result<(), Error>{
             }
         }
     }
-
+    
+    //TODO: Den här retunerar okej 
+    //om detta issue finns
+    //Fungerar skiten
     Ok(())
 }

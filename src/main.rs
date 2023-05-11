@@ -44,7 +44,7 @@ async fn main() -> Result<(), Error>{
             }
             
             println!("LINE:    {}",line);
-            if is_title {
+            if is_title && line.find("//TODO:").is_some() {
                 title_buffer = &line[line.find("//TODO:").unwrap() + 7..];
                 is_title = false;
             }

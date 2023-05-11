@@ -20,7 +20,7 @@ impl GithubApiClient {
         };
     }
 
-    pub async fn post_issue(self, title: String, body: String) -> Result<StatusCode, Error>{
+    pub async fn post_issue(&self, title: &str, body: &str) -> Result<StatusCode, Error>{
         let payload = json!({
             "title": title,
             "body": body,
@@ -46,7 +46,7 @@ impl GithubApiClient {
     // Git trees api??
     // Returns a hashmap with the name of the file as key and the content as value
     // the value will be a vector with each element representing a line of the file
-    pub async fn get_files(self) -> Result<HashMap<String, Vec<String>>, Error> {
+    pub async fn get_files(&self) -> Result<HashMap<String, Vec<String>>, Error> {
         let client = reqwest::Client::new();
 
         //default should be an empty string
@@ -86,7 +86,10 @@ impl GithubApiClient {
             
             let file_resp = filereq.text().await?;
 
-            let file_json : serde_json::Value = serde_json::from_str(&file_resp).unwrap();
+            let file_json : serde_json::Value = match serde_json::from_str(&file_resp){
+                Ok(val) => val,
+                Err(e) => continue
+            };
 
             //check if content exists
             //Might not be neeeded

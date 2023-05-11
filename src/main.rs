@@ -28,28 +28,29 @@ async fn main() -> Result<(), Error>{
             continue;
         }
 
-        let content = &v[0];
-        let mut is_title = true;
-        let mut title_buffer: &str = "";
-        let mut body_buffer: String = "".to_owned();
-        for line in content.split('\n').into_iter() {
-            if line.find("//").is_none() {
-                if title_buffer != "" && !is_title{
-                    api.post_issue(title_buffer, &body_buffer).await?;
-                    title_buffer = "";
-                    body_buffer = "".to_owned();
-                    is_title = true;
+        for content in v {
+            let mut is_title = true;
+            let mut title_buffer: &str = "";
+            let mut body_buffer: String = "".to_owned();
+            for line in content.split('\n').into_iter() {
+                if line.find("//").is_none() {
+                    if title_buffer != "" && !is_title{
+                        api.post_issue(title_buffer, &body_buffer).await?;
+                        title_buffer = "";
+                        body_buffer = "".to_owned();
+                        is_title = true;
+                    }
+                    continue;
                 }
-                continue;
-            }
-            
-            println!("LINE:    {}",line);
-            if is_title && line.find("//TODO:").is_some() {
-                title_buffer = &line[line.find("//TODO:").unwrap() + 7..];
-                is_title = false;
-            }
-            else if !is_title{
-                body_buffer = body_buffer + &line[line.find("//").unwrap() + 2..];
+
+                println!("LINE:    {}",line);
+                if is_title && line.find("//TODO:").is_some() {
+                    title_buffer = &line[line.find("//TODO:").unwrap() + 7..];
+                    is_title = false;
+                }
+                else if !is_title{
+                    body_buffer = body_buffer + &line[line.find("//").unwrap() + 2..];
+                }
             }
         }
     }

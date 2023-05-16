@@ -1,4 +1,4 @@
-use octocrab::{OctocrabBuilder, Octocrab, issues::{IssueHandler}, params};
+use octocrab::{OctocrabBuilder, Octocrab, issues::{IssueHandler}, params, current};
 use octocrab::models::issues::Issue;
 use octocrab::Page;
 use std::collections::HashMap;
@@ -36,22 +36,24 @@ impl GithubApiClient {
         Ok(issue)
     }
 
-    //Gets all open issues (hashed by title) in repositiory and counts duplicates, closed issues are ignored.
-    pub async fn get_issues(&self) -> Result<HashMap<String,u8>,octocrab::Error >{
+    //Gets all open issues (hashed by title) and marks duplicates, closed issues are ignored.
+    pub async fn process_issues(&self) -> Result<HashMap<String,Issue>,octocrab::Error >{
         let mut page = self.client.issues(self.owner.clone(), self.repo.clone())
             .list()
             .state(params::State::Open)
             .send()
             .await?;
 
-        let mut map: HashMap<String,u8> = HashMap::new();
+        let mut map: HashMap<String,Issue> = HashMap::new();
         loop {
             for issue in &page {
                 if !map.contains_key(&issue.title){
-                    map.insert(issue.title.clone(), 1);
+                    map.insert(issue.title.clone(), issue.clone());
                 } 
                 else {
-                    *map.get_mut(&issue.title).unwrap() += 1;
+                    //TODO: Atleast check if bodys are equal
+                    *map.get_mut(&issue.title).unwrap() = self.lable_as_duplicate(&map[&issue.title]).await?;
+                    self.lable_as_duplicate(issue).await?;
                 }
             }
 
@@ -67,5 +69,17 @@ impl GithubApiClient {
         
 
         Ok(map)
-    }    
+    } 
+    
+    //TODO: Investigate if duplicate lables are a thing?
+    async fn lable_as_duplicate(&self, issue: &Issue) -> Result<Issue,octocrab::Error> {
+        println!("Issue number: {}, marked as duplicate", issue.number);
+        let new_issue = self.client.issues(self.owner.clone(), self.repo.clone())
+            .update(issue.number)
+            .labels(&[String::from("duplicate")])
+            .send()
+            .await?;
+
+        Ok(new_issue)
+    } 
 }

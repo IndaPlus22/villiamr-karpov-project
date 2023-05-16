@@ -6,7 +6,7 @@ pub struct GithubApiClient {
     client: Octocrab,
     owner: String,
     repo: String,
-    issues: Option<HashMap<String,Issue>>
+    pub issues: Option<HashMap<String,Issue>>
 }
 
 impl GithubApiClient {
@@ -29,7 +29,7 @@ impl GithubApiClient {
     //TODO: Issues could be constructed inside the parsing function
     //Alternatively function could take arguments for lables, assignies and so on as options
     //Currently bare issues are created: title, body and a lable
-    pub async fn post_issue(&self,title: &str, body: &str) -> Result<Issue, octocrab::Error>{
+    pub async fn post_issue(&self,title: String, body: String) -> Result<Issue, octocrab::Error>{
         let issue = self.client
             .issues(self.owner.clone(), self.repo.clone())
             .create(title)

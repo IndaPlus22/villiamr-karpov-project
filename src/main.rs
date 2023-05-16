@@ -115,7 +115,12 @@ fn walk_dirs(base_dir: PathBuf, client: &api_interaction::GithubApiClient){
         if let Some(extension) = get_fileextension(path.as_ref().unwrap().file_name().to_str().unwrap()){
             if valid_extensions.contains(&extension) {
                 println!("Parsing file {}", path.as_ref().unwrap().path().display());
-                println!("{:#?}", parse_file(path.unwrap().path()));
+                for (title, body) in parse_file(path.unwrap().path()) {
+                    if !client.issues.as_ref().unwrap().contains_key(&title) {
+                        client.post_issue(title, body);
+                    }
+
+                }
             } 
         }
     }

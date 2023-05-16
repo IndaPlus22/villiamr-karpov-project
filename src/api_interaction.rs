@@ -48,8 +48,11 @@ impl GithubApiClient {
     pub async fn get_issues() -> Result<Page<Issue>,octocrab::Error >{
         let repo = std::env::var("INPUT_REPO").unwrap();
         let owner: Vec<&str> = repo.split("/").collect();
-        let octocrab = octocrab::instance();
-        let issues = octocrab.issues(owner[0], owner[1]).list().send().await?;
+        let issues = octocrab::instance()
+            .issues(owner[0], owner[1])
+            .list()
+            .send()
+            .await?;
 
         Ok(issues)
     }    

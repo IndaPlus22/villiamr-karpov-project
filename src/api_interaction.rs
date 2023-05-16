@@ -1,132 +1,97 @@
-use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
-use serde_json::json;
-use base64::{Engine as _, engine::{general_purpose}};
+use octocrab::{Octocrab, params };
+use octocrab::models::issues::Issue;
 use std::collections::HashMap;
 
 pub struct GithubApiClient {
-    headers: HeaderMap
+    client: Octocrab,
+    owner: String,
+    repo: String,
+    pub issues: Option<HashMap<String,Issue>>
 }
 
 impl GithubApiClient {
-    pub fn new() -> GithubApiClient {
-        let mut header = HeaderMap::new();
-        header.insert(header::USER_AGENT, header::HeaderValue::from_static("TODO ACTION"));
-        header.insert(header::AUTHORIZATION,format!("token {}",std::env::var("INPUT_TOKEN").unwrap()).parse().unwrap());
-        header.insert(header::CONTENT_TYPE, header::HeaderValue::from_static("application/json"));
-
-
-        return GithubApiClient{
-            headers: header, 
+    pub async fn new() -> Result<GithubApiClient, octocrab::Error> {
+        let repo = std::env::var("INPUT_REPO").unwrap();
+        let owner_and_repo: Vec<&str> = repo.split("/").collect();
+        let mut this = GithubApiClient {
+            client: octocrab::OctocrabBuilder::default()
+                .personal_token(std::env::var("INPUT_TOKEN").unwrap())
+                .base_uri(std::env::var("INPUT_API_URL").unwrap())?
+                .build()?,
+            owner: owner_and_repo[0].to_string(),
+            repo: owner_and_repo[1].to_string(),
+            issues: None
         };
+        this.issues = Some(this.process_issues().await?);
+        Ok(this)
     }
 
-    pub async fn post_issue(&self, title: &str, body: &str) -> Result<StatusCode, Error>{
-        let payload = json!({
-            "title": title,
-            "body": body,
-        });
-        
-        let client = reqwest::Client::new();
-
-        let url = format!("{}/repos/{}/issues", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
-
-        let resp = client.post(url)
-            .headers(self.headers.clone())
-            .json(&payload)
+    //TODO: Issues could be constructed inside the parsing function
+    //Alternatively function could take arguments for lables, assignies and so on as options
+    //Currently bare issues are created: title, body and a lable
+    pub async fn post_issue(&self,title: String, body: String) -> Result<Issue, octocrab::Error>{
+        let issue = self.client
+            .issues(self.owner.clone(), self.repo.clone())
+            .create(title)
+            .body(body)
+            .labels(vec![String::from("TODO")])
             .send()
             .await?;
 
-        let status = resp.status();
-        let resp_body = resp.text().await?;
-        println!("Response body: {}", resp_body);
-
-        Ok(status)
+        Ok(issue)
     }
 
-    // Git trees api??
-    // Returns a hashmap with the name of the file as key and the content as value
-    // the value will be a vector with each element representing a line of the file
-    pub async fn get_files(&self) -> Result<HashMap<String, Vec<String>>, Error> {
-        let client = reqwest::Client::new();
-
-        //default should be an empty string
-        //TODO: What if the main branch has some other name?
-        //Recurisve equal to something else?
-        let url = format!("{}/repos/{}/git/trees/main?recursive=1", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
-
-        let resp = client.get(url)
-            .headers(self.headers.clone())
+    //Gets all open issues (hashed by title) and marks duplicates, closed issues are ignored.
+    pub async fn process_issues(&self) -> Result<HashMap<String,Issue>,octocrab::Error >{
+        let mut page = self.client.issues(self.owner.clone(), self.repo.clone())
+            .list()
+            .state(params::State::Open)
             .send()
             .await?;
-        
-        let status = resp.status();
-        let resp_body = resp.text().await?;
 
-        //Get the url for each file
-        let json: serde_json::Value = serde_json::from_str(&resp_body).unwrap();
-
-        let tree = &json["tree"];
-        
-        //Create the hashmap
-        let mut files = std::collections::HashMap::new();
-
-        for item in tree.as_array().unwrap() {
-            //Checks if the item is a file
-            if item.get("type").unwrap().as_str().unwrap() != "blob" {
-                continue;
-            }
-            let url = item.get("url").unwrap().as_str().unwrap();
-            let name = item.get("path").unwrap().as_str().unwrap();
-
-            //get the content of the file
-            let filereq = client.get(url)
-                .headers(self.headers.clone())
-                .send()
-                .await?;
-            
-            let file_resp = filereq.text().await?;
-
-            let file_json : serde_json::Value = match serde_json::from_str(&file_resp){
-                Ok(val) => val,
-                Err(e) => continue
-            };
-
-            //check if content exists
-            //Might not be neeeded
-            if !file_json.get("content").is_some() {
-                continue;
+        let mut map: HashMap<String,Issue> = HashMap::new();
+        loop {
+            for issue in &page {
+                if !map.contains_key(&issue.title){
+                    map.insert(issue.title.clone(), issue.clone());
+                } 
+                else {
+                    // If issue exists and has equal body to other we mark both as dupicate
+                    if issue.body == map[&issue.title].body {
+                        *map.get_mut(&issue.title).unwrap() = self.lable_issue(&map[&issue.title], String::from("duplicate")).await?;
+                        self.lable_issue(issue, String::from("duplicate")).await?;
+                    }
+                    // If only title are equal we flag that too
+                    else {
+                        *map.get_mut(&issue.title).unwrap() = self.lable_issue(&map[&issue.title], String::from("duplicate title")).await?;
+                        self.lable_issue(issue, String::from("duplicate title")).await?;
+                    }
+                }
             }
 
-            
-            let content = file_json.get("content").unwrap().as_str().unwrap();
-            //The content is encoded in base64 but the newlines are not encoded. So we handle that by splitting the lines and decoding them one by one
-            //Get the lines of the file
-            let temp_lines: Vec<&str> = content.split('\n').collect();
-
-            let mut lines = Vec::new();
-            //JAG HAR INGEN ANING VARFÖR DET HÄR FUNKAR
-            //FÖR NÅGONG ANLEDNING FIXAR DET NEWLINE PROBLEMET OCH DECODAR RÄTT
-            for chunk in temp_lines.chunks(temp_lines.len()) {
-                let concatenated = chunk.join("");
-                lines.push(concatenated);
-        }
-
-            //Decode the lines
-            let mut decoded_lines = Vec::new();
-            //Decode each line
-            for line in lines {
-                //base64:decode might be deprecated
-                let decoded_line = general_purpose::STANDARD.decode(line).unwrap();
-                //convert from utf8 to string and put it in the vector
-                decoded_lines.push(String::from_utf8(decoded_line).unwrap());
-            }
-
-            //put the files in the hashmap
-            files.insert(String::from(name), decoded_lines);
-
+            page = match self.client
+                .get_page::<Issue>(&page.next)
+                .await? 
+            {
+                Some(next_page) => next_page,
+                None => break,
+                
+            } 
         }
         
-        //Return the hashmap
-        Ok(files)
-    }
+
+        Ok(map)
+    } 
+    
+    //TODO: Investigate if duplicate lables are a thing? could be an edge case with >2 duolicated issues
+    async fn lable_issue(&self, issue: &Issue,lable: String) -> Result<Issue,octocrab::Error> {
+        println!("Issue number: {}, marked as duplicate", issue.number);
+        let new_issue = self.client.issues(self.owner.clone(), self.repo.clone())
+            .update(issue.number)
+            .labels(&[lable])
+            .send()
+            .await?;
+
+        Ok(new_issue)
+    } 
 }

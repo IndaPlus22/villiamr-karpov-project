@@ -17,5 +17,5 @@ inputs:
   
 runs: 
   using: 'docker'
-  image: 'ghcr.io/indaplus22/villiamr-karpov-project:sha256-afd2f1f5975cc752d977ae5edab7ba8d1887e7a57f52f54508e6733749ed65be.sig'
+  image: 'Dockerfile'
 

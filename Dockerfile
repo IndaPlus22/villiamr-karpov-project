@@ -1,20 +1,20 @@
-FROM lukemathwalker/cargo-chef:latest-rust-latest AS chef
-WORKDIR app
+FROM rust:latest as builder
 
-FROM chef AS planner
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+RUN USER=root cargo new --bin todo
+WORKDIR ./todo
+COPY ./Cargo.toml ./Cargo.toml
+COPY ./Cargo.lock ./Cargo.lock
+RUN cargo build --release 
 
-FROM chef AS builder
-COPY --from=planner /app/recipe.json recipe.json
-# Build and cache deps before source
-RUN cargo chef cook --release --recipe-path recipe.json
-# Build source
-COPY . .
-RUN cargo build --release --bin villiamr-karpov-project
+RUN rm src/*.rs
 
-FROM ubuntu:20.04 AS runtime
-RUN apt-get update && apt install -y openssl ca-certificates
-COPY --from=builder /app/target/release/villiamr-karpov-project .
+COPY ./src ./src
 
-ENTRYPOINT ["/villiamr-karpov-project"]
+RUN rm ./target/release/todo*
+RUN cargo build --release
+
+FROM rust:latest
+
+COPY --from=build /todo/target/release/todo .
+
+ENTRYPOINT["/todo"]

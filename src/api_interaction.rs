@@ -1,6 +1,5 @@
-use octocrab::{OctocrabBuilder, Octocrab, issues::{IssueHandler}, params, current};
+use octocrab::{Octocrab, params };
 use octocrab::models::issues::Issue;
-use octocrab::Page;
 use std::collections::HashMap;
 
 pub struct GithubApiClient {
@@ -23,13 +22,15 @@ impl GithubApiClient {
         });
     }
 
-    //TODO: Issues should be constructed inside the parsing function
+    //TODO: Issues could be constructed inside the parsing function
     //Alternatively function could take arguments for lables, assignies and so on as options
+    //Currently bare issues are created: title, body and a lable
     pub async fn post_issue(&self,title: &str, body: &str) -> Result<Issue, octocrab::Error>{
         let issue = self.client
             .issues(self.owner.clone(), self.repo.clone())
             .create(title)
             .body(body)
+            .labels(vec![String::from("TODO")])
             .send()
             .await?;
 
@@ -51,9 +52,16 @@ impl GithubApiClient {
                     map.insert(issue.title.clone(), issue.clone());
                 } 
                 else {
-                    //TODO: Atleast check if bodys are equal
-                    *map.get_mut(&issue.title).unwrap() = self.lable_as_duplicate(&map[&issue.title]).await?;
-                    self.lable_as_duplicate(issue).await?;
+                    // If issue exists and has equal body to other we mark both as dupicate
+                    if issue.body == map[&issue.title].body {
+                        *map.get_mut(&issue.title).unwrap() = self.lable_issue(&map[&issue.title], String::from("duplicate")).await?;
+                        self.lable_issue(issue, String::from("duplicate")).await?;
+                    }
+                    // If only title are equal we flag that too
+                    else {
+                        *map.get_mut(&issue.title).unwrap() = self.lable_issue(&map[&issue.title], String::from("duplicate title")).await?;
+                        self.lable_issue(issue, String::from("duplicate title")).await?;
+                    }
                 }
             }
 
@@ -71,12 +79,12 @@ impl GithubApiClient {
         Ok(map)
     } 
     
-    //TODO: Investigate if duplicate lables are a thing?
-    async fn lable_as_duplicate(&self, issue: &Issue) -> Result<Issue,octocrab::Error> {
+    //TODO: Investigate if duplicate lables are a thing? could be an edge case with >2 duolicated issues
+    async fn lable_issue(&self, issue: &Issue,lable: String) -> Result<Issue,octocrab::Error> {
         println!("Issue number: {}, marked as duplicate", issue.number);
         let new_issue = self.client.issues(self.owner.clone(), self.repo.clone())
             .update(issue.number)
-            .labels(&[String::from("duplicate")])
+            .labels(&[lable])
             .send()
             .await?;
 

@@ -1,7 +1,7 @@
 FROM rust:latest as builder
 
 RUN USER=root cargo new --bin villiamr-karpov-project
-WORKDIR ./todo
+WORKDIR ./villiamr-karpov-project
 COPY ./Cargo.toml ./Cargo.toml
 COPY ./Cargo.lock ./Cargo.lock
 RUN cargo build --release 

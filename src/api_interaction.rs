@@ -4,6 +4,7 @@ use base64::{Engine as _, engine::{general_purpose}};
 use std::collections::HashMap;
 use octocrab::{params, Octocrab, Page};  
 use octocrab::models::issues::Issue;
+use std::fs;
 
 pub struct GithubApiClient {
     headers: HeaderMap
@@ -56,6 +57,7 @@ impl GithubApiClient {
 
         Ok(issues)
     }    
+
 
     // Git trees api??
     // Returns a hashmap with the name of the file as key and the content as value

@@ -1,7 +1,7 @@
 mod api_interaction;
 
 use std::{fs::{self, File}, path::PathBuf, io::Read, str::Chars};
-
+use async_recursion::async_recursion;
 /* Supported languages include c, c++, java, rust, javascript (Should be extendable to all c-style
  * comments without any changes more than adding them to list of extensions. We have decided
  * against to make sure our project does not destroy someones repo in case of unforseen side
@@ -97,8 +97,8 @@ fn parse_file(path: PathBuf) -> Vec<(String, String)>{
 }
 
 
-
-fn walk_dirs(base_dir: PathBuf, client: &api_interaction::GithubApiClient){ 
+#[async_recursion]
+async fn walk_dirs(base_dir: PathBuf, client: &api_interaction::GithubApiClient) -> Result<(),octocrab::Error> { 
     println!("Searching dir: {}", base_dir.display());
     let paths = fs::read_dir(&base_dir).unwrap();
 
@@ -108,7 +108,7 @@ fn walk_dirs(base_dir: PathBuf, client: &api_interaction::GithubApiClient){
         if path.as_ref().unwrap().path().is_dir() {
             let mut req_dir = base_dir.clone();
             req_dir.push(path.as_ref().unwrap().path());
-            walk_dirs(req_dir, client);
+            walk_dirs(req_dir, client).await?;
             continue;
         }
         // If it's not a dir
@@ -117,23 +117,23 @@ fn walk_dirs(base_dir: PathBuf, client: &api_interaction::GithubApiClient){
                 println!("Parsing file {}", path.as_ref().unwrap().path().display());
                 for (title, body) in parse_file(path.unwrap().path()) {
                     if !client.issues.as_ref().unwrap().contains_key(&title) {
-                        client.post_issue(title, body);
+                        client.post_issue(title, body).await?;
                     }
 
                 }
             } 
         }
     }
+    Ok(())
 } 
 
 #[tokio::main]
 async fn main() -> Result<(), octocrab::Error>{
     let client = api_interaction::GithubApiClient::new().await?;
-    walk_dirs(PathBuf::from("/github/workspace/"), &client);    
+    Ok(walk_dirs(PathBuf::from("/github/workspace/"), &client).await?) 
 
 
     //TODO: Den här retunerar okej 
     //om detta issue finns
     //Fungerar skiten
-    Ok(())
 }

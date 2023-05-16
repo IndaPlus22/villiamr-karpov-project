@@ -7,49 +7,34 @@ use octocrab::models::issues::Issue;
 use std::fs;
 
 pub struct GithubApiClient {
-    headers: HeaderMap
+    client: Octocrab,
+    owner: String,
+    repo: String
 }
 
 impl GithubApiClient {
-    pub fn new() -> GithubApiClient {
-        let mut header = HeaderMap::new();
-        header.insert(header::USER_AGENT, header::HeaderValue::from_static("TODO ACTION"));
-        header.insert(header::AUTHORIZATION,format!("token {}",std::env::var("INPUT_TOKEN").unwrap()).parse().unwrap());
-        header.insert(header::CONTENT_TYPE, header::HeaderValue::from_static("application/json"));
-
-
-        return GithubApiClient{
-            headers: header, 
-        };
+    pub fn new() -> Result<GithubApiClient, octocrab::Error> {
+        let repo = std::env::var("INPUT_REPO").unwrap();
+        let owner_and_repo: Vec<&str> = repo.split("/").collect();
+        return Ok(GithubApiClient {
+            client: octocrab::OctocrabBuilder::default()
+                .personal_token(std::env::var("INPUT_TOKEN").unwrap())
+                .base_uri(std::env::var("INPUT_API_URL").unwrap())?
+                .build()?,
+            owner: owner_and_repo[0].to_string(),
+            repo: owner_and_repo[1].to_string()
+        });
     }
 
-    pub async fn post_issue(title: &str, body: &str) -> Result<Issue, octocrab::Error>{
-        let repo = std::env::var("INPUT_REPO").unwrap();
-        let owner: Vec<&str> = repo.split("/").collect();
-        let test = octocrab::OctocrabBuilder::default()
-            .personal_token(std::env::var("INPUT_TOKEN").unwrap())
-            .base_uri(std::env::var("INPUT_API_URL").unwrap())?
-            .build()?;
-
-        let issue = test.issues(owner[0], owner[1]).create(title).body(body).send().await?;
-            //        let payload = json!({
-//            "title": title,
-//            "body": body,
-//        });
-//        
-//        let client = reqwest::Client::new();
-//
-//        let url = format!("{}/repos/{}/issues", std::env::var("INPUT_API_URL").unwrap(), std::env::var("INPUT_REPO").unwrap());
-//
-//        let resp = client.post(url)
-//            .headers(self.headers.clone())
-//            .json(&payload)
-//            .send()
-//            .await?;
-//
-//        let status = resp.status();
-//        let resp_body = resp.text().await?;
-//        println!("Response body: {}", resp_body);
+    //TODO: Issues should be constructed inside the parsing function
+    //Alternatively function could take arguments for lables, assignies and so on as options
+    pub async fn post_issue(&self,title: &str, body: &str) -> Result<Issue, octocrab::Error>{
+        let issue = self.client
+            .issues(self.owner.clone(), self.repo.clone())
+            .create(title)
+            .body(body)
+            .send()
+            .await?;
 
         Ok(issue)
     }

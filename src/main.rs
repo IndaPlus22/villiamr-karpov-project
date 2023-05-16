@@ -14,9 +14,11 @@ fn get_fileextension(s: &str) -> Option<&str> {
 
 #[tokio::main]
 async fn main() -> Result<(), octocrab::Error>{
-    let issue = api_interaction::GithubApiClient::post_issue("Hello world", "Created with octocrab").await?;
-    println!("{:#?}", issue);
+    let client = api_interaction::GithubApiClient::new()?;
 
+    let issue = client.post_issue("TEST: Cleaned up interface", "Hello world").await?;
+
+    println!("{:#?}", issue);
     //TODO: Den här retunerar okej 
     //om detta issue finns
     //Fungerar skiten

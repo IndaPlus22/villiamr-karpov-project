@@ -14,13 +14,8 @@ fn get_fileextension(s: &str) -> Option<&str> {
 
 #[tokio::main]
 async fn main() -> Result<(), octocrab::Error>{
-    use std::fs;
-
-    let paths = fs::read_dir("/github/workspace/").unwrap();
-
-    for path in paths {
-        println!("{}", path.unwrap().path().display());
-    }
+    let issue = api_interaction::GithubApiClient::post_issue("Hello world", "Created with octocrab").await?;
+    println!("{:#?}", issue);
 
     //TODO: Den här retunerar okej 
     //om detta issue finns

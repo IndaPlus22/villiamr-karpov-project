@@ -66,7 +66,7 @@ fn parse_todo(iterator: &mut Chars, index: &mut usize) -> Option<(String, String
     Some((title,body))
 }
 
-fn parse_file(path: &str) -> Vec<(String, String)>{
+fn parse_file(path: PathBuf) -> Vec<(String, String)>{
     let mut todos = Vec::new();
     let mut content = String::new();
     let file = File::open(path).expect("Could not open file").read_to_string(&mut content).unwrap();
@@ -115,7 +115,7 @@ fn walk_dirs(base_dir: PathBuf, client: &api_interaction::GithubApiClient){
         if let Some(extension) = get_fileextension(path.as_ref().unwrap().file_name().to_str().unwrap()){
             if valid_extensions.contains(&extension) {
                 println!("Parsing file {}", path.as_ref().unwrap().path().display());
-                println!("{:#?}", parse_file(path.as_ref().unwrap().file_name().to_str().unwrap()));
+                println!("{:#?}", parse_file(path.unwrap().path()));
             } 
         }
     }

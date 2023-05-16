@@ -2,6 +2,8 @@ use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
 use serde_json::json;
 use base64::{Engine as _, engine::{general_purpose}};
 use std::collections::HashMap;
+use octocrab::{params, Octocrab, Page};  
+use octocrab::models::issues::Issue;
 
 pub struct GithubApiClient {
     headers: HeaderMap
@@ -42,6 +44,15 @@ impl GithubApiClient {
 
         Ok(status)
     }
+
+    pub async fn get_issues() -> Result<Page<Issue>,octocrab::Error >{
+        let repo = std::env::var("INPUT_REPO").unwrap();
+        let owner: Vec<&str> = repo.split("/").collect();
+        let octocrab = octocrab::instance();
+        let issues = octocrab.issues(owner[0], owner[1]).list().send().await?;
+
+        Ok(issues)
+    }    
 
     // Git trees api??
     // Returns a hashmap with the name of the file as key and the content as value

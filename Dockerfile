@@ -1,6 +1,6 @@
 FROM rust:latest as builder
 
-RUN USER=root cargo new --bin todo
+RUN USER=root cargo new --bin villiamr-karpov-project
 WORKDIR ./todo
 COPY ./Cargo.toml ./Cargo.toml
 COPY ./Cargo.lock ./Cargo.lock
@@ -10,11 +10,11 @@ RUN rm src/*.rs
 
 COPY ./src ./src
 
-RUN rm ./target/release/todo*
+RUN rm ./target/release/villiamr-karpov-project*
 RUN cargo build --release
 
 FROM rust:latest
 
-COPY --from=build /todo/target/release/todo .
+COPY --from=build /todo/target/release/villiamr-karpov-project .
 
-ENTRYPOINT["/todo"]
+ENTRYPOINT["/villiamr-karpov-project"]

@@ -17,4 +17,4 @@ FROM rust:latest
 
 COPY --from=builder /todo/target/release/villiamr-karpov-project .
 
-ENTRYPOINT["/villiamr-karpov-project"]
+ENTRYPOINT ["/villiamr-karpov-project"]

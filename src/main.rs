@@ -16,9 +16,10 @@ fn get_fileextension(s: &str) -> Option<&str> {
 async fn main() -> Result<(), octocrab::Error>{
     let client = api_interaction::GithubApiClient::new()?;
 
-    let issue = client.post_issue("TEST: Cleaned up interface", "Hello world").await?;
+    let issues = client.get_issues().await?;
+    println!("{:#?}",issues);
 
-    println!("{:#?}", issue);
+
     //TODO: Den här retunerar okej 
     //om detta issue finns
     //Fungerar skiten

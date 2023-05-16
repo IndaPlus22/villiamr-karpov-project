@@ -1,10 +1,7 @@
-use reqwest::{header::{self,HeaderMap}, Error, StatusCode};
-use serde_json::json;
-use base64::{Engine as _, engine::{general_purpose}};
-use std::collections::HashMap;
-use octocrab::{params, Octocrab, Page};  
+use octocrab::{OctocrabBuilder, Octocrab, issues::{IssueHandler}, params};
 use octocrab::models::issues::Issue;
-use std::fs;
+use octocrab::Page;
+use std::collections::HashMap;
 
 pub struct GithubApiClient {
     client: Octocrab,
@@ -39,15 +36,36 @@ impl GithubApiClient {
         Ok(issue)
     }
 
-    pub async fn get_issues() -> Result<Page<Issue>,octocrab::Error >{
-        let repo = std::env::var("INPUT_REPO").unwrap();
-        let owner: Vec<&str> = repo.split("/").collect();
-        let issues = octocrab::instance()
-            .issues(owner[0], owner[1])
+    //Gets all open issues (hashed by title) in repositiory and counts duplicates, closed issues are ignored.
+    pub async fn get_issues(&self) -> Result<HashMap<String,u8>,octocrab::Error >{
+        let mut page = self.client.issues(self.owner.clone(), self.repo.clone())
             .list()
+            .state(params::State::Open)
             .send()
             .await?;
 
-        Ok(issues)
+        let mut map: HashMap<String,u8> = HashMap::new();
+        loop {
+            for issue in &page {
+                if !map.contains_key(&issue.title){
+                    map.insert(issue.title.clone(), 1);
+                } 
+                else {
+                    *map.get_mut(&issue.title).unwrap() += 1;
+                }
+            }
+
+            page = match self.client
+                .get_page::<Issue>(&page.next)
+                .await? 
+            {
+                Some(next_page) => next_page,
+                None => break,
+                
+            } 
+        }
+        
+
+        Ok(map)
     }    
 }

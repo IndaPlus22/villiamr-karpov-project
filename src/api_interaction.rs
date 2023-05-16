@@ -5,21 +5,25 @@ use std::collections::HashMap;
 pub struct GithubApiClient {
     client: Octocrab,
     owner: String,
-    repo: String
+    repo: String,
+    issues: Option<HashMap<String,Issue>>
 }
 
 impl GithubApiClient {
-    pub fn new() -> Result<GithubApiClient, octocrab::Error> {
+    pub async fn new() -> Result<GithubApiClient, octocrab::Error> {
         let repo = std::env::var("INPUT_REPO").unwrap();
         let owner_and_repo: Vec<&str> = repo.split("/").collect();
-        return Ok(GithubApiClient {
+        let mut this = GithubApiClient {
             client: octocrab::OctocrabBuilder::default()
                 .personal_token(std::env::var("INPUT_TOKEN").unwrap())
                 .base_uri(std::env::var("INPUT_API_URL").unwrap())?
                 .build()?,
             owner: owner_and_repo[0].to_string(),
-            repo: owner_and_repo[1].to_string()
-        });
+            repo: owner_and_repo[1].to_string(),
+            issues: None
+        };
+        this.issues = Some(this.process_issues().await?);
+        Ok(this)
     }
 
     //TODO: Issues could be constructed inside the parsing function

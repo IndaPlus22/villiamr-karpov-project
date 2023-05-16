@@ -26,8 +26,13 @@ impl GithubApiClient {
     pub async fn post_issue(title: &str, body: &str) -> Result<Issue, octocrab::Error>{
         let repo = std::env::var("INPUT_REPO").unwrap();
         let owner: Vec<&str> = repo.split("/").collect();
-        let test = octocrab::instance().issues(owner[0], owner[1]).create(title).body(body).send().await?;
-//        let payload = json!({
+        let test = octocrab::OctocrabBuilder::default()
+            .personal_token(std::env::var("INPUT_TOKEN").unwrap())
+            .base_uri(std::env::var("INPUT_API_URL").unwrap())?
+            .build()?;
+
+        let issue = test.issues(owner[0], owner[1]).create(title).body(body).send().await?;
+            //        let payload = json!({
 //            "title": title,
 //            "body": body,
 //        });
@@ -46,7 +51,7 @@ impl GithubApiClient {
 //        let resp_body = resp.text().await?;
 //        println!("Response body: {}", resp_body);
 
-        Ok(test)
+        Ok(issue)
     }
 
     pub async fn get_issues() -> Result<Page<Issue>,octocrab::Error >{

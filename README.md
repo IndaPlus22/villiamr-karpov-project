@@ -19,7 +19,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v3
-            - uses: IndaPlus22/villiamr-krapov-project@alpha
+            - uses: IndaPlus22/villiamr-krapov-project@v.0.0.1
 ```
 
 Comments inside your code should follow the examples below in order to be converted into issues:

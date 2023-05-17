@@ -34,7 +34,7 @@ Comments inside your code should follow the examples below in order to be conver
 ### IMPORTANT NOTE
 
 This action is currently private and can only be used on this repository. Hence, using the yml above does not actually work on other repositories. In order to use this action it has to be 
-published to `Github marketplace` which requires permissions from a `IndaPlus22` administrator. 
+published to `Github marketplace` which requires permissions from a `IndaPlus22` administrator. To test run the action you may go to `Actions->Integration-test` and run the workflow on this repository. If you want an issue to be created feel free to first close an existing issue tagged `TODO`, preforably one whithout any comments or useful human input. 
 
 ## Supported languages
 
